@@ -120,4 +120,3 @@ class PerevalRepository:
         except Exception as e:
             self.db.rollback()
             raise e
-        
