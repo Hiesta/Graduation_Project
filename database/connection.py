@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 # Загрузка переменных окружения
 load_dotenv()
 
-# Получение параметров подключения из переменных окружения
+# Получаем параметры подключения к базе данных
 DB_HOST = os.getenv("FSTR_DB_HOST", "localhost")
 DB_PORT = os.getenv("FSTR_DB_PORT", "5432")
 DB_LOGIN = os.getenv("FSTR_DB_LOGIN", "postgres")
@@ -23,7 +23,7 @@ DATABASE_URL = f"postgresql://{DB_LOGIN}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}
 # Создание движка SQLAlchemy
 engine = create_engine(DATABASE_URL, echo=True)
 
-# Создание фабрики сессий
+# Создаем фабрику сессий для работы с базой данных
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Базовый класс для моделей

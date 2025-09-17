@@ -5,11 +5,11 @@ from sqlalchemy import Column, Integer, String
 from database.connection import Base
 
 class Coords(Base):
-    """Модель координат в базе данных."""
-    
+    """Координаты перевала на карте."""
+
     __tablename__ = "coords"
-    
+
     id = Column(Integer, primary_key=True, index=True)
-    latitude = Column(String, nullable=False)  # Широта
-    longitude = Column(String, nullable=False)  # Долгота
-    height = Column(String, nullable=False)    # Высота
+    latitude = Column(String, nullable=False)  # Широта перевала
+    longitude = Column(String, nullable=False)  # Долгота перевала
+    height = Column(String, nullable=False)    # Высота над уровнем моря
