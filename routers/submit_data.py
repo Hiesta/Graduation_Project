@@ -70,4 +70,3 @@ async def submit_data(
                 message="Внутренняя ошибка сервера",
                 id=None
             )
-        
