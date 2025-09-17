@@ -4,15 +4,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.submit_data import router as submit_data_router
-from database.connection import engine
-from models import user, coords, level, image, pereval
+from database.connection import engine, Base
 
 # Создание таблиц в базе данных
-user.Base.metadata.create_all(bind=engine)
-coords.Base.metadata.create_all(bind=engine)
-level.Base.metadata.create_all(bind=engine)
-image.Base.metadata.create_all(bind=engine)
-pereval.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 # Создание экземпляра FastAPI
 app = FastAPI(

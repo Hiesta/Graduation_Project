@@ -141,6 +141,177 @@ API предоставляет единственный endpoint `POST /submitDa
 - `400` - Ошибка валидации данных
 - `500` - Ошибка сервера или базы данных
 
+### GET /api/submitData/{id}
+
+Получает перевал по его ID.
+
+**Запрос:**
+```bash
+curl -X GET "http://localhost:8000/api/submitData/42"
+```
+
+**Ответ:**
+```json
+{
+  "id": 42,
+  "beauty_title": "пер. Пхия",
+  "title": "Пхия",
+  "other_titles": "Триев",
+  "connect": "",
+  "add_time": "2021-09-22T13:18:13",
+  "status": "new",
+  "user": {
+    "id": 1,
+    "email": "qwerty@mail.ru",
+    "fam": "Пупкин",
+    "name": "Василий",
+    "otc": "Иванович",
+    "phone": "+7 555 55 55"
+  },
+  "coords": {
+    "id": 1,
+    "latitude": "45.3842",
+    "longitude": "7.1525",
+    "height": "1200"
+  },
+  "level": {
+    "id": 1,
+    "winter": "",
+    "summer": "1А",
+    "autumn": "1А",
+    "spring": ""
+  },
+  "images": [
+    {
+      "id": 1,
+      "data": "<base64_encoded_image>",
+      "title": "Седловина",
+      "pereval_id": 42
+    }
+  ]
+}
+```
+
+**Коды ответов:**
+- `200` - Успешное получение записи
+- `400` - Перевал не найден
+- `500` - Ошибка сервера
+
+### PATCH /api/submitData/{id}
+
+Обновляет существующий перевал (только если статус = 'new').
+
+**Запрос:**
+```bash
+curl -X PATCH "http://localhost:8000/api/submitData/42" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "beauty_title": "Обновленное название",
+       "title": "Обновленный перевал",
+       "coords": {
+         "latitude": "45.5000",
+         "longitude": "7.2000",
+         "height": "1300"
+       }
+     }'
+```
+
+**Ответ (успех):**
+```json
+{
+  "state": 1,
+  "message": null
+}
+```
+
+**Ответ (ошибка - статус не 'new'):**
+```json
+{
+  "state": 0,
+  "message": "Редактирование запрещено: статус не 'new'"
+}
+```
+
+**Ответ (перевал не найден):**
+```json
+{
+  "state": 0,
+  "message": "Перевал не найден"
+}
+```
+
+**Ограничения:**
+- Можно изменять только перевалы со статусом 'new'
+- Запрещено изменять ФИО, email и телефон пользователя
+- Разрешено изменять: beauty_title, title, other_titles, connect, add_time, coords, level, images
+
+### GET /api/submitData/?user__email=<email>
+
+Получает список всех перевалов пользователя по email.
+
+**Запрос:**
+```bash
+curl -X GET "http://localhost:8000/api/submitData/?user__email=qwerty@mail.ru"
+```
+
+**Запрос с пагинацией:**
+```bash
+curl -X GET "http://localhost:8000/api/submitData/?user__email=qwerty@mail.ru&offset=0&limit=10"
+```
+
+**Ответ:**
+```json
+[
+  {
+    "id": 42,
+    "beauty_title": "пер. Пхия",
+    "title": "Пхия",
+    "other_titles": "Триев",
+    "connect": "",
+    "add_time": "2021-09-22T13:18:13",
+    "status": "new",
+    "user": {
+      "id": 1,
+      "email": "qwerty@mail.ru",
+      "fam": "Пупкин",
+      "name": "Василий",
+      "otc": "Иванович",
+      "phone": "+7 555 55 55"
+    },
+    "coords": {
+      "id": 1,
+      "latitude": "45.3842",
+      "longitude": "7.1525",
+      "height": "1200"
+    },
+    "level": {
+      "id": 1,
+      "winter": "",
+      "summer": "1А",
+      "autumn": "1А",
+      "spring": ""
+    },
+    "images": [
+      {
+        "id": 1,
+        "data": "<base64_encoded_image>",
+        "title": "Седловина",
+        "pereval_id": 42
+      }
+    ]
+  }
+]
+```
+
+**Параметры запроса:**
+- `user__email` (обязательный) - Email пользователя
+- `offset` (опциональный, по умолчанию 0) - Смещение для пагинации
+- `limit` (опциональный) - Лимит записей для пагинации
+
+**Коды ответов:**
+- `200` - Успешное получение списка
+- `500` - Ошибка сервера
+
 ## Структура базы данных
 
 ### Таблица `users`
@@ -199,15 +370,57 @@ alembic downgrade -1
 
 ## Тестирование
 
-Для тестирования API используйте:
+### Автоматические тесты
+
+Запуск всех тестов:
+```bash
+pytest tests/
+```
+
+Запуск только unit-тестов репозитория:
+```bash
+pytest tests/test_repository.py
+```
+
+Запуск только интеграционных тестов API:
+```bash
+pytest tests/test_api_integration.py
+```
+
+### Ручное тестирование
 
 1. **Swagger UI:** http://localhost:8000/docs
-2. **curl:**
+2. **curl примеры:**
+
+   Создание перевала:
    ```bash
    curl -X POST "http://localhost:8000/api/submitData" \
         -H "Content-Type: application/json" \
         -d '{"beauty_title": "Тест", "title": "Тестовый перевал", ...}'
    ```
+
+   Получение перевала по ID:
+   ```bash
+   curl -X GET "http://localhost:8000/api/submitData/1"
+   ```
+
+   Обновление перевала:
+   ```bash
+   curl -X PATCH "http://localhost:8000/api/submitData/1" \
+        -H "Content-Type: application/json" \
+        -d '{"title": "Обновленное название"}'
+   ```
+
+   Получение перевалов по email:
+   ```bash
+   curl -X GET "http://localhost:8000/api/submitData/?user__email=test@example.com"
+   ```
+
+3. **Демонстрационный скрипт:**
+   ```bash
+   python demo_api.py
+   ```
+   Скрипт автоматически протестирует все endpoints API.
 
 ## Особенности реализации
 
